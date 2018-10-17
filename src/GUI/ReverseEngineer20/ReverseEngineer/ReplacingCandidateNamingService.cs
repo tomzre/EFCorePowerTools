@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Scaffolding.Internal;
 using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
@@ -8,11 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ReverseEngineer20.ReverseEngineer
 {
-    public class ReplacingCandidateNamingService: CandidateNamingService
+    public class ReplacingCandidateNamingService : CandidateNamingService
     {
         private readonly List<Schema> _customNameOptions;
 
@@ -44,7 +41,7 @@ namespace ReverseEngineer20.ReverseEngineer
 
                 return candidateStringBuilder.ToString();
             }
-            else if(schema.Tables.Count > 0)
+            else if (schema.Tables.Count > 0)
             {
                 var newTableName = _customNameOptions.Where(x => x.SchemaName == schema.SchemaName)
                     .Select(x => x.Tables)
@@ -52,9 +49,9 @@ namespace ReverseEngineer20.ReverseEngineer
                     .Select(table => table.NewName).FirstOrDefault())
                     .FirstOrDefault();
 
-                if(string.IsNullOrWhiteSpace(newTableName))
+                if (string.IsNullOrWhiteSpace(newTableName))
                 {
-                    candidateStringBuilder.Append(originalTable.Name);
+                    candidateStringBuilder.Append(ToPascalCase(originalTable.Name));
 
                     return candidateStringBuilder.ToString();
                 }
@@ -76,12 +73,12 @@ namespace ReverseEngineer20.ReverseEngineer
 
             var schema = GetSchema(originalColumn.Table.Schema);
 
-            if(schema == null)
+            if (schema == null)
             {
                 return base.GenerateCandidateIdentifier(originalColumn);
             }
 
-            if(schema.Tables == null)
+            if (schema.Tables == null)
             {
                 return base.GenerateCandidateIdentifier(originalColumn);
             }
@@ -90,11 +87,10 @@ namespace ReverseEngineer20.ReverseEngineer
                 .Where(x => x.SchemaName == schema.SchemaName)
                 .Select(x => x.Tables)
                 .Select(x => x.Where(table => table.Name == originalColumn.Table.Name)
-                .FirstOrDefault()).FirstOrDefault()?.Columns
-                .Where(x => x.Name == originalColumn.Name).FirstOrDefault();
-                
+                .FirstOrDefault()).FirstOrDefault()?.Columns?.Where(x => x.Name == originalColumn.Name)
+                .FirstOrDefault();
 
-            if(columns != null)
+            if (columns != null)
             {
                 candidateStringBuilder.Append(columns.NewName);
                 return candidateStringBuilder.ToString();
@@ -106,7 +102,7 @@ namespace ReverseEngineer20.ReverseEngineer
         }
 
         private Schema GetSchema(string originalSchema)
-            =>_customNameOptions
+            => _customNameOptions
                   .Where(x => x.SchemaName.Contains(originalSchema))
                   .Select(x =>
                       new Schema
@@ -114,7 +110,6 @@ namespace ReverseEngineer20.ReverseEngineer
                           SchemaName = x.SchemaName,
                           UseSchemaName = x.UseSchemaName,
                           Tables = x.Tables
-
                       })
                   .FirstOrDefault();
 
